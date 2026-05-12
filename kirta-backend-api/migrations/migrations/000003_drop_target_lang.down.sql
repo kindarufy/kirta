@@ -1,0 +1,1 @@
+ALTER TABLE kirta.scans ADD COLUMN IF NOT EXISTS target_lang TEXT;

@@ -1,0 +1,459 @@
+openapi: 3.0.3
+info:
+  title: Kirta Backend API
+  version: "1.0.0"
+  description: |
+    Backend API для SCA-сканирования Python-проектов.
+
+    Основной поток:
+    1. `POST /v1/scan` — загрузка ZIP-архива, запуск Syft/Grype/graph-tracing, сохранение результата.
+    2. `GET /v1/scans/{id}` — получение полного отчета.
+    3. `POST /v1/scans/{id}/findings/{finding_id}/explanation` — on-demand расчет explanation/exploitability для одного finding.
+
+    Особенности:
+    - В `sca_report[].exploitable` используется строковый enum:
+      - `exploitable`
+      - `not_exploitable`
+      - `unknown`
+    - Во время `POST /v1/scan` explanation не рассчитываются массово (on-demand модель).
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: scans
+    description: Операции сканирования, графов вызовов и файлов скана
+
+paths:
+  /v1/scan:
+    post:
+      tags: [scans]
+      summary: Start a scan
+      description: |
+        Загружает ZIP-архив Python-проекта, распаковывает его, запускает:
+        - Syft для SBOM
+        - Grype для SCA
+        - Python graph tracer для call_map
+
+        Затем сохраняет скан и возвращает полный `ScanInfo`.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: ZIP архив проекта
+      responses:
+        "200":
+          description: Scan completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanInfo"
+              examples:
+                success:
+                  summary: Minimal successful scan response
+                  value:
+                    id: 12
+                    repository: dvpwa-master
+                    status: completed
+                    manifest: [114, 101, 113]
+                    sha256: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+                    sloc: 1250
+                    langs:
+                      - lang: Python
+                        sloc: 1250
+                    libraries:
+                      - package: pyyaml
+                        version: "5.1"
+                    sca_report:
+                      - id: 1
+                        package: pyyaml
+                        version: "5.1"
+                        severity: Critical
+                        state: fixed
+                        fixed_version: ["5.2"]
+                        cve: ["CVE-2019-20477"]
+                        description: Deserialization of Untrusted Data in PyYAML
+                        exploitable: unknown
+                        explanation: ""
+                    created_at: "2026-05-11T17:00:00Z"
+                    finished_at: "2026-05-11T17:00:09Z"
+        "400":
+          description: Missing or invalid `file` field
+        "401":
+          description: Unsupported language (no Python code detected)
+        "500":
+          description: Internal processing error
+
+  /v1/scans:
+    get:
+      tags: [scans]
+      summary: List all scans
+      description: |
+        Возвращает облегченный список сканов (без тяжелого JSONB payload).
+        Сортировка: `created_at DESC`.
+      responses:
+        "200":
+          description: Scan list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ScanBaseInfo"
+        "500":
+          description: Internal error
+
+  /v1/scans/{id}:
+    get:
+      tags: [scans]
+      summary: Get scan by ID
+      description: Возвращает полный `ScanInfo` по идентификатору скана.
+      parameters:
+        - $ref: "#/components/parameters/ScanIdPathParam"
+      responses:
+        "200":
+          description: Full scan report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanInfo"
+        "400":
+          description: Invalid `id`
+        "404":
+          description: Scan not found
+        "500":
+          description: Internal error
+
+  /v1/scans/{id}/findings/{finding_id}/explanation:
+    post:
+      tags: [scans]
+      summary: Generate explanation for one finding
+      description: |
+        Выполняет on-demand enrichment для одного SCA finding:
+        - находит finding в `scan.sca_report` по `finding_id`
+        - достает соответствующий call_map библиотеки
+        - вычисляет `explanation` и `exploitable`
+        - сохраняет обновленный finding обратно в `sca` JSONB
+        - возвращает полный обновленный `ScaFinding`
+
+        Правило `empty_call_map`:
+        - `exploitable = not_exploitable`
+        - `explanation = "В проекте не найдено подтверждённых вызовов уязвимого пакета."`
+      parameters:
+        - $ref: "#/components/parameters/ScanIdPathParam"
+        - name: finding_id
+          in: path
+          required: true
+          description: Finding ID внутри `sca_report`
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Updated finding
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScaFinding"
+              examples:
+                updated:
+                  value:
+                    id: 2
+                    package: pyyaml
+                    version: "5.1"
+                    severity: Critical
+                    state: fixed
+                    fixed_version: ["5.4"]
+                    cve: ["CVE-2020-14343"]
+                    description: Improper Input Validation in PyYAML
+                    exploitable: exploitable
+                    explanation: "Вызов yaml.load с небезопасным режимом достижим из пользовательского ввода."
+        "400":
+          description: Invalid `id` or `finding_id`
+        "404":
+          description: Scan or finding not found
+        "500":
+          description: Internal error
+
+  /v1/scans/{id}/graphs:
+    get:
+      tags: [scans]
+      summary: Get call map by library
+      description: |
+        Возвращает call_map для конкретной библиотеки в рамках скана.
+        Если граф не найден — возвращается пустой `Graph` c `call_map: []`.
+      parameters:
+        - $ref: "#/components/parameters/ScanIdPathParam"
+        - name: package
+          in: query
+          required: true
+          description: Имя пакета/библиотеки
+          schema:
+            type: string
+            minLength: 1
+        - name: version
+          in: query
+          required: false
+          description: Версия библиотеки (опционально)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Graph found or empty fallback graph
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Graph"
+        "400":
+          description: Invalid `id` or empty `package`
+        "500":
+          description: Internal error
+
+  /v1/scans/{id}/files/{filepath}:
+    get:
+      tags: [scans]
+      summary: Download a source file from a scan
+      description: |
+        Отдает сырой файл, который встречается в `call_map`.
+        Источник: MinIO key `scans/{id}/{filepath}`.
+      parameters:
+        - $ref: "#/components/parameters/ScanIdPathParam"
+        - name: filepath
+          in: path
+          required: true
+          description: |
+            Относительный путь файла внутри проекта.
+            Пример: `src/utils.py`.
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: File stream
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid `id` or empty `filepath`
+        "404":
+          description: File not found in storage
+        "500":
+          description: Internal error
+
+components:
+  parameters:
+    ScanIdPathParam:
+      name: id
+      in: path
+      required: true
+      description: Scan ID
+      schema:
+        type: integer
+        minimum: 1
+
+  schemas:
+    ScanInfo:
+      type: object
+      required:
+        - id
+        - repository
+        - status
+        - manifest
+        - sha256
+        - sloc
+        - langs
+        - libraries
+        - sca_report
+        - created_at
+        - finished_at
+      properties:
+        id:
+          type: integer
+          format: int64
+        repository:
+          type: string
+        status:
+          type: string
+          example: completed
+        manifest:
+          type: array
+          description: Содержимое `requirements.txt` в виде массива байтов
+          items:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 255
+        sha256:
+          type: string
+          description: SHA-256 загруженного ZIP-архива
+        sloc:
+          type: integer
+          description: Общее количество строк кода
+        langs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Langs"
+        libraries:
+          type: array
+          items:
+            $ref: "#/components/schemas/Libraries"
+        sca_report:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScaFinding"
+        created_at:
+          type: string
+          format: date-time
+        finished_at:
+          type: string
+          format: date-time
+
+    ScanBaseInfo:
+      type: object
+      required: [id, repository, status, sloc, sha256, created_at, finished_at]
+      properties:
+        id:
+          type: integer
+          format: int64
+        repository:
+          type: string
+        status:
+          type: string
+        sloc:
+          type: integer
+        sha256:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        finished_at:
+          type: string
+          format: date-time
+
+    ScaFinding:
+      type: object
+      required:
+        - id
+        - package
+        - version
+        - severity
+        - state
+        - fixed_version
+        - cve
+        - description
+        - exploitable
+        - explanation
+      properties:
+        id:
+          type: integer
+        package:
+          type: string
+        version:
+          type: string
+        severity:
+          type: string
+          description: Severity из SCA (например Critical/High/Medium/Low)
+        state:
+          type: string
+          description: Состояние finding (например fixed)
+        fixed_version:
+          type: array
+          items:
+            type: string
+        cve:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        exploitable:
+          type: string
+          description: Трехстатусная оценка эксплуатируемости
+          enum:
+            - exploitable
+            - not_exploitable
+            - unknown
+        explanation:
+          type: string
+          description: |
+            Пояснение для exploitable-оценки.
+            После `/v1/scan` может быть пустой строкой до on-demand enrichment.
+
+    Graph:
+      type: object
+      required: [package, version, call_map]
+      properties:
+        id:
+          type: integer
+          format: int64
+        scan_id:
+          type: integer
+          format: int64
+        package:
+          type: string
+        version:
+          type: string
+        call_map:
+          type: array
+          items:
+            $ref: "#/components/schemas/CallMap"
+
+    CallMap:
+      type: object
+      required: [file, lines, calls]
+      properties:
+        file:
+          type: string
+        lines:
+          type: array
+          items:
+            type: integer
+        calls:
+          type: array
+          items:
+            $ref: "#/components/schemas/CallItem"
+
+    CallItem:
+      type: object
+      required: [line, caller, call_method, resolved, source, args_count]
+      properties:
+        line:
+          type: integer
+        caller:
+          type: string
+        call_method:
+          type: string
+        resolved:
+          type: string
+        source:
+          type: string
+        args_count:
+          type: integer
+
+    Libraries:
+      type: object
+      required: [package, version]
+      properties:
+        package:
+          type: string
+        version:
+          type: string
+
+    Langs:
+      type: object
+      required: [lang, sloc]
+      properties:
+        lang:
+          type: string
+        sloc:
+          type: integer

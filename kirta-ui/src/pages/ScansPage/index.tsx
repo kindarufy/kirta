@@ -1,0 +1,1 @@
+export { ScansPage } from "./ScansPage";

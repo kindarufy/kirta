@@ -1,0 +1,31 @@
+{
+  "scan_id": 0,
+  "repository_name": "",
+  "total_sloc": 0,
+  "langs": [
+    {
+      "lang": "python",
+      "sloc": 123
+    }
+  ],
+  "libraries": [
+    {
+      "package": "pyyaml",
+      "version": ""
+    }
+  ],
+  "findings": [
+    {
+      "package": "some_package",
+      "version": "version",
+      "severity": "",
+      "state":  "",
+      "fixed_version": [""],
+      "cve": [""],
+      "description": "",
+      "exploitable":  true,
+      "explanation": ""
+    }
+  ]
+}
+

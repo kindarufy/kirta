@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Generated schema for Root",
+  "type": "object",
+  "properties": {
+    "cve": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "package": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "severity": {
+      "type": "string"
+    },
+    "cwes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cve": {
+            "type": "string"
+          },
+          "cwe": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cve",
+          "cwe",
+          "source",
+          "type"
+        ]
+      }
+    }
+  },
+  "required": [
+    "cve",
+    "description",
+    "package",
+    "severity",
+    "cwes"
+  ]
+}

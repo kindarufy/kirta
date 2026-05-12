@@ -1,0 +1,49 @@
+app:
+  grype_path: "grype"
+  syft_path: "syft"
+  sca_path: "./sca.py"
+  graph_path: "./graph.py"
+  bucket_name: "your-bucket"
+  openrouter_api_key: "YOUR_OPENROUTER_API_KEY"
+  openrouter_model: "openai/gpt-4.1-mini"
+  openrouter_base_url: "https://openrouter.ai/api/v1"
+  openrouter_timeout: 20s
+  openrouter_callmap_max_files: 20
+  openrouter_callmap_max_calls: 200
+
+
+postgres:
+  host: "127.0.0.1"
+  port: 5432
+  database: "kirta"
+  ssl: "disable"
+  username: "YOUR_USERNAME"
+  password: "YOUR_PASSWORD"
+  pool_config:
+    max_connections: 10
+    min_connections: 2
+    max_connection_lifetime: "1h"
+    max_conn_idle_time: "30m"
+    health_check_period: "1m"
+    connect_timeout: "10s"
+
+minio:
+  endpoint: "127.0.0.1:9000"
+  use_ssl: false
+  credentials:
+    access_key: "YOUR_ACCESS_KEY"
+    secret_key: "YOUR_SECRET_KEY"
+
+logger:
+  level: "info"
+  enable_caller: true
+  log_file: "./kirta.log"
+
+
+http:
+  address: "0.0.0.0:8080"
+  read_header_timeout: 5s
+  read_timeout: 5m
+  write_timeout: 30s
+  idle_timeout: 1m
+  max_header_bytes: 1048576 # 1 MB

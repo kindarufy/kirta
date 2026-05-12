@@ -1,0 +1,40 @@
+# Secrets and env
+.env
+.env.*
+!.env.example
+kirta-backend-api/config.yaml
+
+# Frontend build/deps/cache
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+kirta-ui/r.json
+
+# Local test sandboxes and reports
+test-input/
+test-repo/
+test-result/
+reports/
+
+# Generated scan and trace artifacts
+*.cdx.json
+*-sca.json
+*-tiny-sca.json
+*-package-trace.json
+*-agent-input.json
+
+# Local binaries
+syft
+syft.exe
+grype
+grype.exe
+
+# Logs and caches
+*.log
+.cache/
+.pytest_cache/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

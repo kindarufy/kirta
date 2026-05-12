@@ -1,0 +1,81 @@
+.landing-root {
+  @apply relative overflow-hidden bg-slate-950 text-slate-100;
+  background-image:
+    radial-gradient(1000px 480px at 0% -15%, rgba(34, 211, 238, 0.12), transparent 60%),
+    radial-gradient(800px 420px at 100% 0%, rgba(59, 130, 246, 0.18), transparent 60%),
+    radial-gradient(1200px 520px at 50% 100%, rgba(16, 185, 129, 0.08), transparent 55%);
+}
+
+.landing-grid {
+  @apply pointer-events-none absolute inset-0 opacity-40;
+  background-image:
+    linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at 50% 20%, black 35%, transparent 85%);
+}
+
+.landing-glow {
+  @apply pointer-events-none absolute rounded-full blur-3xl;
+  animation: landing-pulse 7s ease-in-out infinite;
+}
+
+.landing-card {
+  @apply rounded-2xl border border-slate-700/55 bg-slate-900/65 shadow-2xl shadow-black/35 backdrop-blur-xl;
+}
+
+.landing-section-title {
+  @apply text-3xl font-semibold tracking-tight text-white sm:text-4xl;
+}
+
+.landing-flow-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.landing-json {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+body.landing-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(71, 85, 105, 0.9) rgba(2, 6, 23, 1);
+}
+
+body.landing-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+body.landing-scroll::-webkit-scrollbar-track {
+  background: rgba(2, 6, 23, 0.96);
+}
+
+body.landing-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(71, 85, 105, 0.95), rgba(51, 65, 85, 0.95));
+  border: 2px solid rgba(2, 6, 23, 0.96);
+  border-radius: 9999px;
+}
+
+body.landing-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(96, 165, 250, 0.6), rgba(59, 130, 246, 0.55));
+}
+
+@keyframes landing-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}

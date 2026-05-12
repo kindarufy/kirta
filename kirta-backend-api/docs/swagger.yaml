@@ -1,0 +1,240 @@
+basePath: /
+definitions:
+  kirta-backend-api_internal_domain.CallItem:
+    properties:
+      args_count:
+        type: integer
+      call_method:
+        type: string
+      caller:
+        type: string
+      line:
+        type: integer
+      resolved:
+        type: string
+      source:
+        type: string
+    type: object
+  kirta-backend-api_internal_domain.CallMap:
+    properties:
+      calls:
+        items:
+          $ref: '#/definitions/kirta-backend-api_internal_domain.CallItem'
+        type: array
+      file:
+        type: string
+      lines:
+        items:
+          type: integer
+        type: array
+    type: object
+  kirta-backend-api_internal_domain.Langs:
+    properties:
+      lang:
+        type: string
+      sloc:
+        type: integer
+    type: object
+  kirta-backend-api_internal_domain.Libraries:
+    properties:
+      package:
+        type: string
+      version:
+        type: string
+    type: object
+  kirta-backend-api_internal_domain.ScaFinding:
+    properties:
+      call_map:
+        items:
+          $ref: '#/definitions/kirta-backend-api_internal_domain.CallMap'
+        type: array
+      cve:
+        items:
+          type: string
+        type: array
+      description:
+        type: string
+      explanation:
+        type: string
+      exploitable:
+        type: boolean
+      fixed_version:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      package:
+        type: string
+      severity:
+        type: string
+      state:
+        type: string
+      version:
+        type: string
+    type: object
+  kirta-backend-api_internal_domain.ScanBaseInfo:
+    properties:
+      created_at:
+        type: string
+      finished_at:
+        type: string
+      id:
+        type: integer
+      repository:
+        type: string
+      sha256:
+        type: string
+      sloc:
+        type: integer
+      status:
+        type: string
+    type: object
+  kirta-backend-api_internal_domain.ScanInfo:
+    properties:
+      created_at:
+        type: string
+      finished_at:
+        type: string
+      id:
+        type: integer
+      langs:
+        items:
+          $ref: '#/definitions/kirta-backend-api_internal_domain.Langs'
+        type: array
+      libraries:
+        items:
+          $ref: '#/definitions/kirta-backend-api_internal_domain.Libraries'
+        type: array
+      manifest:
+        items:
+          type: integer
+        type: array
+      repository:
+        type: string
+      sca_report:
+        items:
+          $ref: '#/definitions/kirta-backend-api_internal_domain.ScaFinding'
+        type: array
+      sha256:
+        type: string
+      sloc:
+        type: integer
+      status:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: SCA (Software Composition Analysis) scan service — detects vulnerable
+    dependencies and traces call-map usage in Python projects.
+  title: Kirta Backend API
+  version: "1.0"
+paths:
+  /v1/scan:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a ZIP archive of a Python project. The service unpacks it,
+        runs Syft (SBOM) + Grype (SCA) + the Python call-map tracer, persists the
+        result and returns the full scan report.
+      parameters:
+      - description: ZIP archive of the Python project
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/kirta-backend-api_internal_domain.ScanInfo'
+        "400":
+          description: file field missing
+        "500":
+          description: internal error
+      summary: Start a scan
+      tags:
+      - scans
+  /v1/scans:
+    get:
+      description: Returns a lightweight list of all scans ordered by creation time
+        descending (no JSONB payload — id, repository, language, status, sloc, sha256,
+        timestamps only).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/kirta-backend-api_internal_domain.ScanBaseInfo'
+            type: array
+        "500":
+          description: internal error
+      summary: List all scans
+      tags:
+      - scans
+  /v1/scans/{id}:
+    get:
+      description: Returns the full scan report including language breakdown, library
+        list, and SCA findings with call maps.
+      parameters:
+      - description: Scan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/kirta-backend-api_internal_domain.ScanInfo'
+        "400":
+          description: invalid id
+        "404":
+          description: scan not found
+        "500":
+          description: internal error
+      summary: Get scan by ID
+      tags:
+      - scans
+  /v1/scans/{id}/files/{filepath}:
+    get:
+      description: Streams the raw source file that was referenced in a call_map entry.
+        The file is fetched from MinIO S3 using the key scans/{id}/{filepath}.
+      parameters:
+      - description: Scan ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Relative file path inside the project (e.g. src/utils.py)
+        in: path
+        name: filepath
+        required: true
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Raw file contents
+          schema:
+            type: file
+        "400":
+          description: invalid id or empty path
+        "404":
+          description: file not found in storage
+        "500":
+          description: internal error
+      summary: Download a source file from a scan
+      tags:
+      - scans
+schemes:
+- http
+- https
+swagger: "2.0"

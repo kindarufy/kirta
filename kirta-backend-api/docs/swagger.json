@@ -1,0 +1,354 @@
+{
+    "schemes": [
+        "http",
+        "https"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "SCA (Software Composition Analysis) scan service — detects vulnerable dependencies and traces call-map usage in Python projects.",
+        "title": "Kirta Backend API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/v1/scan": {
+            "post": {
+                "description": "Upload a ZIP archive of a Python project. The service unpacks it, runs Syft (SBOM) + Grype (SCA) + the Python call-map tracer, persists the result and returns the full scan report.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scans"
+                ],
+                "summary": "Start a scan",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "ZIP archive of the Python project",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/kirta-backend-api_internal_domain.ScanInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "file field missing"
+                    },
+                    "500": {
+                        "description": "internal error"
+                    }
+                }
+            }
+        },
+        "/v1/scans": {
+            "get": {
+                "description": "Returns a lightweight list of all scans ordered by creation time descending (no JSONB payload — id, repository, language, status, sloc, sha256, timestamps only).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scans"
+                ],
+                "summary": "List all scans",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/kirta-backend-api_internal_domain.ScanBaseInfo"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "internal error"
+                    }
+                }
+            }
+        },
+        "/v1/scans/{id}": {
+            "get": {
+                "description": "Returns the full scan report including language breakdown, library list, and SCA findings with call maps.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scans"
+                ],
+                "summary": "Get scan by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/kirta-backend-api_internal_domain.ScanInfo"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid id"
+                    },
+                    "404": {
+                        "description": "scan not found"
+                    },
+                    "500": {
+                        "description": "internal error"
+                    }
+                }
+            }
+        },
+        "/v1/scans/{id}/files/{filepath}": {
+            "get": {
+                "description": "Streams the raw source file that was referenced in a call_map entry. The file is fetched from MinIO S3 using the key scans/{id}/{filepath}.",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "scans"
+                ],
+                "summary": "Download a source file from a scan",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Scan ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Relative file path inside the project (e.g. src/utils.py)",
+                        "name": "filepath",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Raw file contents",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "invalid id or empty path"
+                    },
+                    "404": {
+                        "description": "file not found in storage"
+                    },
+                    "500": {
+                        "description": "internal error"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "kirta-backend-api_internal_domain.CallItem": {
+            "type": "object",
+            "properties": {
+                "args_count": {
+                    "type": "integer"
+                },
+                "call_method": {
+                    "type": "string"
+                },
+                "caller": {
+                    "type": "string"
+                },
+                "line": {
+                    "type": "integer"
+                },
+                "resolved": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                }
+            }
+        },
+        "kirta-backend-api_internal_domain.CallMap": {
+            "type": "object",
+            "properties": {
+                "calls": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/kirta-backend-api_internal_domain.CallItem"
+                    }
+                },
+                "file": {
+                    "type": "string"
+                },
+                "lines": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "kirta-backend-api_internal_domain.Langs": {
+            "type": "object",
+            "properties": {
+                "lang": {
+                    "type": "string"
+                },
+                "sloc": {
+                    "type": "integer"
+                }
+            }
+        },
+        "kirta-backend-api_internal_domain.Libraries": {
+            "type": "object",
+            "properties": {
+                "package": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "kirta-backend-api_internal_domain.ScaFinding": {
+            "type": "object",
+            "properties": {
+                "call_map": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/kirta-backend-api_internal_domain.CallMap"
+                    }
+                },
+                "cve": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "explanation": {
+                    "type": "string"
+                },
+                "exploitable": {
+                    "type": "boolean"
+                },
+                "fixed_version": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "package": {
+                    "type": "string"
+                },
+                "severity": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "kirta-backend-api_internal_domain.ScanBaseInfo": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "finished_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "sloc": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "kirta-backend-api_internal_domain.ScanInfo": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "finished_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "langs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/kirta-backend-api_internal_domain.Langs"
+                    }
+                },
+                "libraries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/kirta-backend-api_internal_domain.Libraries"
+                    }
+                },
+                "manifest": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "sca_report": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/kirta-backend-api_internal_domain.ScaFinding"
+                    }
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "sloc": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

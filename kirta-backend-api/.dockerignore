@@ -1,0 +1,16 @@
+# Version control
+.git/
+.gitignore
+
+# Editor / IDE
+.cursor/
+.vscode/
+.idea/
+
+# Runtime artifacts
+*.log
+kirta-backend-api
+
+# Temp / OS
+.DS_Store
+*.tmp
