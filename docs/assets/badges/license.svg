@@ -1,0 +1,17 @@
+<svg width="132" height="36" viewBox="0 0 132 36" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="License MIT">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="132" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111827"></stop>
+      <stop offset="1" stop-color="#14532D"></stop>
+    </linearGradient>
+    <linearGradient id="accent" x1="86" y1="0" x2="132" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#65A30D"></stop>
+      <stop offset="1" stop-color="#16A34A"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="131" height="35" rx="10.5" fill="url(#bg)" stroke="#166534"></rect>
+  <rect x="86" y="0" width="46" height="36" rx="11" fill="url(#accent)"></rect>
+  <path d="M20 10.5L27 13.2V18.2C27 22.3 24.1 25.9 20 27.2C15.9 25.9 13 22.3 13 18.2V13.2L20 10.5Z" stroke="#BBF7D0" stroke-width="1.7" stroke-linejoin="round"></path>
+  <text x="38" y="22" fill="#D1D5DB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600">License</text>
+  <text x="109" y="22" fill="white" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle">MIT</text>
+</svg>

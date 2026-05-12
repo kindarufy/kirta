@@ -1,0 +1,21 @@
+<svg width="132" height="36" viewBox="0 0 132 36" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Status MVP">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="132" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111827"></stop>
+      <stop offset="1" stop-color="#1E1B4B"></stop>
+    </linearGradient>
+    <linearGradient id="accent" x1="84" y1="0" x2="132" y2="36" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED"></stop>
+      <stop offset="1" stop-color="#4F46E5"></stop>
+    </linearGradient>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="131" height="35" rx="10.5" fill="url(#bg)" stroke="#312E81"></rect>
+  <rect x="84" y="0" width="48" height="36" rx="11" fill="url(#accent)"></rect>
+
+  <circle cx="19" cy="18" r="5" fill="#A78BFA"></circle>
+  <circle cx="19" cy="18" r="9" stroke="#A78BFA" stroke-opacity="0.25" stroke-width="2"></circle>
+
+  <text x="34" y="50%" fill="#D1D5DB" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" dominant-baseline="middle">Status</text>
+  <text x="108" y="50%" fill="white" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="middle">MVP</text>
+</svg>
