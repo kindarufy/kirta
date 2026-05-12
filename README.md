@@ -51,9 +51,10 @@ KIRTA работает как AI-слой поверх результатов **
 
 | Раздел | Где находится |
 |---|---|
-| Live demo | `https://kirta-security.ru/` |
-| Demo login | `https://kirta-security.ru/login` |
-| Demo credentials | `parker / parker` |
+| Вебсайт | `https://kirta-security.ru/` |
+| Авторизация | `https://kirta-security.ru/login` |
+| Демо-логин | `parker` |
+| Демо-пароль | `parker` |
 | Список сканирований | `https://kirta-security.ru/scans` |
 | Страница отчёта | `/:scanId`, например `https://kirta-security.ru/1` |
 | Swagger UI | `/swagger/index.html` при запущенном backend |
@@ -580,4 +581,4 @@ KIRTA честно ограничивает область применения 
 
 ## License
 
-Проект распространяется под лицензией **MIT**. Подробности — в файле [`LICENSE`](./LICENSE).
+Проект распространяется под лицензией **MIT**: [`LICENSE`](./LICENSE)
