@@ -1,10 +1,18 @@
 # KIRTA — AI Security Platform
 
-![Status](https://img.shields.io/badge/status-MVP-6D28D9?style=flat-square)
-![Backend](https://img.shields.io/badge/backend-Go%20%2B%20Gin-0F766E?style=flat-square&logo=go&logoColor=white)
-![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-2563EB?style=flat-square&logo=react&logoColor=white)
-![AI](https://img.shields.io/badge/AI-OpenRouter--compatible-111827?style=flat-square)
-![License](https://img.shields.io/badge/license-MIT-65A30D?style=flat-square)
+[![Status](https://img.shields.io/badge/Status-MVP-7C3AED?style=flat-square)](#)
+[![Demo](https://img.shields.io/badge/Live%20Demo-kirta--security.ru-2563EB?style=flat-square)](https://kirta-security.ru/)
+[![License](https://img.shields.io/badge/License-MIT-65A30D?style=flat-square)](./LICENSE)
+
+<p align="left">
+  <img src="https://skillicons.dev/icons?i=python,go,react,ts,postgres,docker,nginx,vite,tailwind&theme=dark" alt="KIRTA core technologies" />
+</p>
+
+**Core stack:** Go, Gin, Python, React, TypeScript, PostgreSQL, MinIO/S3, Docker, Nginx  
+**Security tooling:** Syft, Grype, SBOM, SCA, static code analysis, call map  
+**AI layer:** OpenRouter-compatible AI explanations with strict JSON output
+
+---
 
 **KIRTA** — AI-платформа для объяснимого анализа уязвимостей в Python-проектах.
 
