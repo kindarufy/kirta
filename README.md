@@ -568,7 +568,7 @@ KIRTA честно ограничивает область применения 
 - поддержка SAST findings;
 - поддержка DAST findings;
 - secrets/IaC/container security signals;
-- интеграции с GitHub/GitLab;
+- интеграции с SourceCraft, GitHub/GitLab;
 - team workspace;
 - role-based access;
 - CI/CD mode для автоматического анализа pull requests.
