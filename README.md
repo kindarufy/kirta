@@ -1,10 +1,10 @@
 # KIRTA — AI Security Platform
 
-![Status](https://img.shields.io/badge/status-MVP-7C3AED)
-![Backend](https://img.shields.io/badge/backend-Go%20%2B%20Gin-00ADD8)
-![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-61DAFB)
-![AI](https://img.shields.io/badge/AI-OpenRouter--compatible-111827)
-![License](https://img.shields.io/badge/license-MIT-green)
+![Status](https://img.shields.io/badge/status-MVP-6D28D9?style=flat-square)
+![Backend](https://img.shields.io/badge/backend-Go%20%2B%20Gin-0F766E?style=flat-square&logo=go&logoColor=white)
+![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-2563EB?style=flat-square&logo=react&logoColor=white)
+![AI](https://img.shields.io/badge/AI-OpenRouter--compatible-111827?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-65A30D?style=flat-square)
 
 **KIRTA** — AI-платформа для объяснимого анализа уязвимостей в Python-проектах.
 
