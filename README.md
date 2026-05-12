@@ -127,6 +127,8 @@ KIRTA показывает путь от загрузки Python-проекта 
 
 ![KIRTA AI explanation](docs/assets/finding-ai.png)
 
+![KIRTA AI sec explanation](docs/assets/finding-sec-ai.png)
+
 ### Карта вызовов
 
 ![KIRTA call map](docs/assets/call-map.png)
