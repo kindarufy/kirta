@@ -1,13 +1,7 @@
 # KIRTA — AI Security Platform
 
 <p align="left">
-  <img src="docs/assets/badges/status.svg" height="36" alt="Status: MVP" />
-  <a href="https://kirta-security.ru/">
-    <img src="docs/assets/badges/demo.svg" height="36" alt="Website: kirta-security.ru" />
-  </a>
-  <a href="./LICENSE">
-    <img src="docs/assets/badges/license.svg" height="36" alt="License: MIT" />
-  </a>
+  <img src="docs/assets/badges/status.svg" height="36" alt="Status: MVP" /> <a href="https://kirta-security.ru/"><img src="docs/assets/badges/demo.svg" height="36" alt="Website: kirta-security.ru" /></a> <a href="./LICENSE"><img src="docs/assets/badges/license.svg" height="36" alt="License: MIT" /></a>
 </p>
 
 <p align="left">
