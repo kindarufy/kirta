@@ -128,6 +128,8 @@ KIRTA показывает путь от загрузки Python-проекта 
 
 ![KIRTA AI explanation](docs/assets/finding-ai.png)
 
+### AI обьяснение о найденном дефекте
+
 ![KIRTA AI sec explanation](docs/assets/finding-sec-ai.png)
 
 ### Карта вызовов
