@@ -25,7 +25,7 @@ export function Sidebar({ onNavigate, onScan, className }: SidebarProps) {
       )}
     >
       <div className="px-5 pb-2 pt-5">
-        <Logo size="lg" />
+        <Logo size="lg" lightSrc="/kirta-logo-light.png" darkSrc="/kirta-logo-black.png" />
       </div>
 
       <div className="px-3 pb-3 pt-3">

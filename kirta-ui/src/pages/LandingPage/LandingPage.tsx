@@ -5,12 +5,16 @@ import {
   Bot,
   BrainCircuit,
   Code2,
+  FileCode2,
   Gauge,
+  Hash,
   Radar,
   ShieldAlert,
-  ShieldCheck,
 } from "lucide-react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/layout/Logo";
 import "./landing.css";
 
 const metrics = [
@@ -69,6 +73,32 @@ const compareRows = [
   },
 ];
 
+const callMapPreviewFiles = [
+  { file: "app.py", path: "extremely-vulnerable-flask-app-main", calls: 5 },
+  { file: "account.py", path: "extremely-vulnerable-flask-app-main", calls: 15 },
+  { file: "home.py", path: "extremely-vulnerable-flask-app-main", calls: 2 },
+  { file: "login.py", path: "extremely-vulnerable-flask-app-main", calls: 6 },
+  { file: "notes.py", path: "extremely-vulnerable-flask-app-main", calls: 6 },
+  { file: "registration_codes.py", path: "extremely-vulnerable-flask-app-main", calls: 7 },
+  { file: "signup.py", path: "extremely-vulnerable-flask-app-main", calls: 9 },
+];
+
+const sourcePreviewCode = `from flask import request
+from flask import jsonify
+import yaml
+
+def import_config():
+    payload = request.data
+    # уязвимый метод библиотеки
+    data = yaml.load(payload, Loader=None)
+    return data
+
+def process_request():
+    if not request.data:
+        return jsonify({"status": "error"}), 400
+    parsed = import_config()
+    return jsonify({"status": "processed", "result": parsed}), 200`;
+
 export function LandingPage() {
   useEffect(() => {
     const root = document.documentElement;
@@ -94,17 +124,14 @@ export function LandingPage() {
 
       <header className="relative z-20 border-b border-slate-800/70 bg-slate-950/75 backdrop-blur-xl">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-400 text-white shadow-lg shadow-cyan-500/20">
-              <ShieldCheck className="h-5 w-5" />
-            </span>
-            <div>
-              <div className="text-lg font-semibold tracking-wide text-white">KIRTA</div>
-              <div className="text-xs text-slate-400">AI Security Platform</div>
-            </div>
-          </div>
+          <Logo
+            size="xl"
+            src="/kirta-logo-landing.png"
+            className="-ml-11 sm:-ml-12"
+            imageClassName="object-contain object-top"
+          />
 
-          <Button asChild size="sm">
+          <Button asChild size="pill" className="h-10 px-5 text-sm font-semibold">
             <Link to="/login">Войти</Link>
           </Button>
         </div>
@@ -124,7 +151,7 @@ export function LandingPage() {
             </div>
 
             <Button asChild size="pill" className="shadow-lg shadow-blue-600/30">
-              <Link to="/scans">
+              <Link to="/scans" state={{ fromLanding: true }}>
                 Попробовать KIRTA
                 <ArrowRight className="h-4 w-4" />
               </Link>
@@ -205,8 +232,10 @@ export function LandingPage() {
           <h2 className="landing-section-title">
             AI-анализ поверх результатов классических сканеров безопасности
           </h2>
-          <p className="text-slate-300 md:whitespace-nowrap">
-            KIRTA объединяет результаты проверок и превращает их в объяснимый security-отчет с понятными приоритетами для команды
+          <p className="text-slate-300">
+            KIRTA объединяет результаты классических security-проверок, сопоставляет их с контекстом исходного кода и формирует объяснимый security-отчет,
+            который помогает команде видеть реальные приоритеты,
+            быстрее оценивать риск и принимать обоснованные решения по исправлению
           </p>
 
           <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-[minmax(0,540px)_auto_180px]">
@@ -231,49 +260,155 @@ export function LandingPage() {
               </p>
             </div>
           </div>
+
+          <div className="space-y-3">
+            <h3 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              Что такое карта вызовов?
+            </h3>
+            <p className="text-slate-300">
+              Карта вызовов библиотеки показывает где и какой метод библиотеки вызывается в
+              исходном коде приложения. Это позволяет командам более точно определить релевантность
+              дефекта безопасности, а AI-анализу более точно определить эксплуатируемость дефекта
+            </p>
+          </div>
+
+          <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+            <div className="landing-card h-full overflow-hidden">
+              <div className="border-b border-slate-700/70 bg-slate-900/80 p-4 sm:p-5">
+                <h3 className="font-mono text-2xl text-slate-100 sm:text-3xl">
+                  Карта вызовов: flask <span className="text-slate-400">@3.1.1</span>
+                </h3>
+                <p className="mt-2 text-sm text-slate-400 sm:text-base">
+                  Файлы и вызовы, связанные с библиотекой в этом сканировании. Нажмите файл, чтобы
+                  открыть исходник
+                </p>
+              </div>
+
+              <div className="p-3 sm:p-4">
+                <div className="space-y-3 rounded-2xl border border-slate-700/70 bg-slate-900/45 p-3 sm:p-4">
+                  <div className="flex flex-wrap items-center gap-2 text-base text-slate-200 sm:text-lg">
+                    <Hash className="h-5 w-5 text-slate-400" />
+                    <span className="text-slate-400">Библиотека:</span>
+                    <span className="font-mono font-semibold text-slate-100">
+                      flask <span className="text-slate-400">@3.1.1</span>
+                    </span>
+                  </div>
+
+                  <div
+                    className="relative overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-950/90 p-3 sm:p-4"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(to right, rgba(148,163,184,0.10) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,163,184,0.10) 1px, transparent 1px)",
+                      backgroundSize: "24px 24px",
+                    }}
+                  >
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-900/25 via-transparent to-slate-950/30" />
+                    <div className="relative grid content-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {callMapPreviewFiles.map((item) => (
+                        <div
+                          key={item.file}
+                          className="flex min-h-[96px] w-full flex-col rounded-2xl border border-slate-600/80 bg-slate-900/90 p-3 text-left shadow-lg shadow-black/20"
+                        >
+                          <span className="flex items-center gap-2">
+                            <FileCode2 className="h-5 w-5 shrink-0 text-emerald-400/90" />
+                            <span className="truncate font-mono text-lg font-semibold text-slate-100 sm:text-xl">
+                              {item.file}
+                            </span>
+                          </span>
+                          <span className="mt-2 truncate pl-7 font-mono text-xs leading-tight text-slate-500">
+                            {item.path}
+                          </span>
+                          <span className="mt-3 pl-7 text-sm text-slate-400">
+                            Вызовов:{" "}
+                            <span className="font-semibold text-slate-100">{item.calls}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="landing-card flex h-full min-h-[520px] flex-col overflow-hidden">
+              <div className="border-b border-slate-700/70 bg-slate-900/80 px-4 py-2 text-xs font-mono text-slate-400">
+                upload.py:42
+              </div>
+              <div className="flex-1 bg-slate-950/90 p-2 sm:p-3">
+                <SyntaxHighlighter
+                  language="python"
+                  style={vscDarkPlus}
+                  showLineNumbers
+                  wrapLines
+                  lineProps={(lineNumber: number) => ({
+                    style:
+                      lineNumber === 8
+                        ? { display: "block", backgroundColor: "rgba(244,63,94,0.16)" }
+                        : { display: "block" },
+                  })}
+                  customStyle={{
+                    margin: 0,
+                    background: "transparent",
+                    padding: "0.75rem",
+                    minHeight: "0",
+                    fontSize: "13px",
+                    lineHeight: "1.5",
+                    fontFamily: "JetBrains Mono, ui-monospace, monospace",
+                    overflow: "hidden",
+                  }}
+                >
+                  {sourcePreviewCode}
+                </SyntaxHighlighter>
+              </div>
+              <div className="border-t border-slate-700/70 bg-slate-900/70 px-4 py-3 text-xs text-rose-200">
+                Уязвимый вызов: <span className="font-mono">yaml.load(payload, Loader=None)</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-14 sm:px-6 lg:grid-cols-2">
           <div className="landing-card p-6">
-            <div className="mb-3 flex items-center gap-2 text-cyan-300">
+            <div className="mb-4 flex items-center justify-center gap-2 text-cyan-300">
               <BrainCircuit className="h-5 w-5" />
-              <h2 className="text-xl font-semibold text-white">Объяснение от AI</h2>
+              <h2 className="text-xl font-semibold text-white">AI-анализ</h2>
             </div>
-            <p className="text-sm text-slate-300">
-              AI анализирует структурированный контекст проекта и формирует объяснение, где
-              риск подтверждается кодом и реальным сценарием эксплуатации
+            <p className="text-left text-base leading-relaxed text-slate-300 sm:text-lg">
+              AI-анализ сопоставляет результаты сканирования, карту вызовов и контекст проекта,
+              определяет реальную достижимость уязвимости в коде, формирует аргументированное
+              объяснение уровня риска и предлагает следующий шаг по исправлению, чтобы команда
+              быстрее переходила от находки к решению
             </p>
           </div>
 
-          <div className="landing-card p-4">
-            <div className="grid gap-3 text-xs text-slate-300 md:grid-cols-2">
-              <div className="rounded-xl border border-slate-700/60 bg-slate-900/80 p-3">
-                <p className="mb-2 text-[11px] uppercase tracking-[0.16em] text-slate-400">
-                  JSON Context
-                </p>
-                <pre className="landing-json text-cyan-100">
-{`{
-  "finding": "CVE-2020-14343",
-  "library": "pyyaml@5.1",
-  "severity": "CRITICAL",
-  "call_path": ["api.entrypoint -> handlers.import_config -> yaml.load"],
-  "code_line": "upload.py:42"
-}`}
-                </pre>
+          <div className="landing-card p-5">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <span className="font-mono text-xs text-slate-400">#2</span>
+              <span className="font-mono text-sm font-semibold text-slate-100">CVE-2020-14343 (pyyaml@5.1)</span>
+            </div>
+
+            <div className="mb-4 flex flex-wrap gap-2">
+              <span className="inline-flex rounded-full border border-rose-400/35 bg-rose-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-rose-300">
+                CRITICAL
+              </span>
+              <span className="inline-flex rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-emerald-300">
+                EXPLOITABLE
+              </span>
+            </div>
+
+            <div className="rounded-md border border-cyan-400/20 bg-cyan-500/5 p-3 text-sm">
+              <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
+                Признаки эксплуатируемости
               </div>
-              <div className="rounded-xl border border-slate-700/60 bg-slate-900/80 p-3">
-                <p className="mb-2 text-[11px] uppercase tracking-[0.16em] text-slate-400">
-                  JSON Verdict
-                </p>
-                <pre className="landing-json text-emerald-100">
-{`{
-  "exploitability": "EXPLOITABLE",
-  "risk_level": "HIGH",
-  "reason": "unsafe yaml.load path",
-  "recommendation": "upgrade to fixed version"
-}`}
-                </pre>
-              </div>
+              <p className="text-slate-200">
+                В коде используется yaml.load(request.data, Loader=None) - вызов без указания
+                безопасной загрузки, что позволяет выполнить произвольный код при обработке
+                пользовательских данных. Это напрямую соответствует уязвимости CVE-2020-14343.
+              </p>
+            </div>
+
+            <div className="mt-3 rounded-md border border-emerald-400/25 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+              Рекомендация: перейти на исправленную версию библиотеки
             </div>
           </div>
         </section>
@@ -344,7 +479,7 @@ export function LandingPage() {
             </p>
             <div className="mt-8 flex justify-center">
               <Button asChild size="pill" className="shadow-lg shadow-blue-600/30">
-                <Link to="/scans">
+                <Link to="/scans" state={{ fromLanding: true }}>
                   Попробовать KIRTA
                   <Bot className="h-4 w-4" />
                 </Link>

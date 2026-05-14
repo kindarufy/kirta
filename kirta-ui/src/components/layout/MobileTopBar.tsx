@@ -19,7 +19,7 @@ export function MobileTopBar({ onMenuOpen, onScan }: MobileTopBarProps) {
       >
         <Menu className="h-5 w-5" />
       </Button>
-      <Logo size="md" />
+      <Logo size="md" lightSrc="/kirta-logo-light.png" darkSrc="/kirta-logo-black.png" />
       <div className="ml-auto">
         <Button
           type="button"

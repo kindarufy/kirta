@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AlertCircle, Loader2, ShieldCheck } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Logo } from "@/components/layout/Logo";
 import { ThemeToggle } from "@/features/theme";
 import { useAuth } from "@/features/auth";
 
@@ -22,7 +23,10 @@ export function LoginPage() {
     e.preventDefault();
     const ok = await login(username.trim(), password);
     if (ok) {
-      navigate(from, { replace: true });
+      navigate(from, {
+        replace: true,
+        state: from === "/scans" ? { fromLogin: true } : null,
+      });
     }
   };
 
@@ -36,11 +40,8 @@ export function LoginPage() {
 
       <div className="relative w-full max-w-md">
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-500 text-white shadow-lg shadow-primary/30">
-            <ShieldCheck className="h-8 w-8" />
-          </span>
+          <Logo size="lg" lightSrc="/kirta-logo-light.png" darkSrc="/kirta-logo-black.png" />
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Kirta</h1>
             <p className="text-sm text-muted-foreground">
               Платформа анализа дефектов безопасности — SAST, DAST, SCA
             </p>
