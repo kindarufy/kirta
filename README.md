@@ -9,7 +9,7 @@
 </p>
 
 **Основной стек технологий:** Go, Gin, Python, React, TypeScript, PostgreSQL, MinIO/S3, Docker, Nginx  
-**Security-инструменты:** Syft, Grype, static code analysis (построение call map)
+**Security-инструменты:** Syft, Grype, static code analysis (построение call map)  
 **AI:** клиент OpenRouter для AI-анализа
 
 ---
