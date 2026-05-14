@@ -5,7 +5,7 @@ app:
   graph_path: "./graph.py"
   bucket_name: "your-bucket"
   openrouter_api_key: "YOUR_OPENROUTER_API_KEY"
-  openrouter_model: "openai/gpt-4.1-mini"
+  openrouter_model: "openai/gpt-oss-120b:free"
   openrouter_base_url: "https://openrouter.ai/api/v1"
   openrouter_timeout: 20s
   openrouter_callmap_max_files: 20
